@@ -1,19 +1,33 @@
-"use client"
-
-import { signIn, signOut } from "next-auth/react"
-import { useSession } from "next-auth/react";
+import { signIn, signOut, auth } from "../auth.js"
  
-export default function SignIn() {
-  const { data: session, status } = useSession()
+export default async function LoginStatus() {
 
-  if (status === "authenticated") {
+  const session = await auth();
+
+  if (session?.user) {
     return (
-      <div>
+      <form
+      action={async () => {
+        "use server"
+        await signOut();
+      }}
+       >
         <p>Signed in as {session.user.email}</p>
-        <button onClick={() => signOut("google")}>Sign Out</button>
-      </div>
+        <button type="submit">Sign Out</button>
+      </form>
+      
     )
   }
 
-  return <button onClick={() => signIn("google")}>Sign In</button>
+  return (
+    <form
+      action={async () => {
+        "use server"
+        await signIn("google");
+      }}
+    >
+      <button type="submit">Sign In With Google</button>
+    </form>
+  )
+
 }
